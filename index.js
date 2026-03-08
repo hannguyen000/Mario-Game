@@ -5,7 +5,7 @@ const c = canvas.getContext('2d');
 canvas.width = 1024;
 canvas.height = 576;
 
-const gravity = 0.5; //weight of gravity (make player fall faster and more natural)
+const gravity = 1.2; //weight of gravity (make player fall faster and more natural)
 
 const spriteRunLeft = new Image();
 spriteRunLeft.src = './image/spriteRunLeft.png';
@@ -260,7 +260,7 @@ addEventListener('keydown', ({ keyCode }) => {
         case 38: // Up arrow
         case 87: // 'W'
             if (player.isOnGround) { // just allow the player to jump if it's on the ground (to prevent double jumping)
-                player.velocity.y = -15; 
+                player.velocity.y = -20; 
                 player.isOnGround = false; // set isOnGround to false when the player jumps, so it can't jump again until it lands back on the ground
             }
             break;
