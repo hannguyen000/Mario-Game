@@ -25,7 +25,7 @@ class Player {
         this.height = 150;
         this.velocity = {
             x: 0, //speed of player in x direction
-            y: 10 //weight of each jump (up and down)
+            y: 0 //weight of each jump (up and down)
         };
         this.speed = 10; //speed of player in x direction
         this.image = spriteStandRight;
@@ -291,7 +291,6 @@ switch (keyCode) {
         break;
     case 38: // Up arrow
     case 87: // 'W'
-        player.velocity.y = 10;
         break;
     case 39: // Right arrow
     case 68: // 'D'
@@ -302,7 +301,6 @@ switch (keyCode) {
         break;
     case 40: // Down arrow
     case 83: // 'S'
-        player.velocity.y = 20;
         break;
 }
 });
