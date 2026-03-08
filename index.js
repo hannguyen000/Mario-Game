@@ -44,8 +44,10 @@ class Player {
                 width: 75 //cropWidth / number of frames in the sprite sheet (to make the player smaller when running)
             }
         };
-            this.currentSprite = this.sprites.stand.right;
-            this.currentCropWidth = this.sprites.stand.cropWidth;
+        this.currentSprite = this.sprites.stand.right;
+        this.currentCropWidth = this.sprites.stand.cropWidth;
+
+        this.isOnGround = false;
     }
 
     //function to draw player on canvas
@@ -141,7 +143,7 @@ hillsImage.src = './image/hills.png';
 const platformData = [
     { x: -1, y: 470, width: platformImage.width, height: platformImage.height, image: platformImage },
     { x: platformImage.width - 3, y: 470, width: platformImage.width, height: platformImage.height, image: platformImage },
-    { x: platformImage.width * 2 + 70, y: 470, width: platformImage.width, height: platformImage.height, image: platformImage },
+    { x: platformImage.width * 2 + 160, y: 470, width: platformImage.width, height: platformImage.height, image: platformImage },
     { x: 300, y: 300, width: 300, height: 50, image: platformImage },
     { x: 500, y: 200, width: 300, height: 50, image: platformImage },
 ];
@@ -185,6 +187,7 @@ function animate() {
     genericObjects.forEach(genericObject => genericObject.draw());
     platforms.forEach(platform => platform.draw());
     player.update();
+    player.isOnGround = false;
 
     if (keys.left.pressed && player.position.x > 100) 
         player.velocity.x = -player.speed; //move left 
@@ -226,6 +229,7 @@ function animate() {
         ) {
             player.velocity.y = 0; 
             player.position.y = platform.position.y - player.height; // player đứng đúng trên platform
+            player.isOnGround = true;
         }
     });
 
@@ -255,7 +259,10 @@ addEventListener('keydown', ({ keyCode }) => {
             break;
         case 38: // Up arrow
         case 87: // 'W'
-            player.velocity.y -= 20;
+            if (player.isOnGround) { // just allow the player to jump if it's on the ground (to prevent double jumping)
+                player.velocity.y = -15; 
+                player.isOnGround = false; // set isOnGround to false when the player jumps, so it can't jump again until it lands back on the ground
+            }
             break;
         case 39: // Right arrow
         case 68: // 'D'
@@ -295,7 +302,7 @@ switch (keyCode) {
         break;
     case 40: // Down arrow
     case 83: // 'S'
-        player.velocity.y = 0;
+        player.velocity.y = 20;
         break;
 }
 });
