@@ -10,11 +10,11 @@ const gravity = 1.2; //weight of gravity (make player fall faster and more natur
 const spriteRunLeft = new Image();
 spriteRunLeft.src = './image/spriteRunLeft.png';
 const spriteRunRight = new Image();
-spriteRunRight.src = './image/spriteRunRight.png';
+spriteRunRight.src = './image/aliceRunRight.png';
 const spriteStandLeft = new Image();
 spriteStandLeft.src = './image/spriteStandLeft.png';
 const spriteStandRight = new Image();
-spriteStandRight.src = './image/spriteStandRight.png';
+spriteStandRight.src = './image/aliceRunRight.png';
 class Player {
     constructor() {
         this.position = {
@@ -27,7 +27,7 @@ class Player {
             x: 0, //speed of player in x direction
             y: 0 //weight of each jump (up and down)
         };
-        this.speed = 10; //speed of player in x direction
+        this.speed = 8; //speed of player in x direction
         this.image = spriteStandRight;
         this.scale = 0.4;
         this.frame = 0; //to keep track of which frame of the sprite sheet to show (for animation)
@@ -35,13 +35,13 @@ class Player {
             stand: {
                 right: spriteStandRight,
                 left: spriteStandLeft,
-                cropWidth: 177,
+                cropWidth: 341,
             },
             run: {
                 right: spriteRunRight,
                 left: spriteRunLeft,
                 cropWidth: 341,
-                width: 75 //cropWidth / number of frames in the sprite sheet (to make the player smaller when running)
+                width: 341 //cropWidth / number of frames in the sprite sheet (to make the player smaller when running)
             }
         };
         this.currentSprite = this.sprites.stand.right;
@@ -70,13 +70,14 @@ class Player {
     //function to update player position and draw it on canvas
     update() {
  // update frame animation
-        this.frame++;
+        if (keys.right.pressed || keys.left.pressed)
+            this.frame++;
         let maxFrame = 0;
 
         if (this.currentSprite === this.sprites.stand.right || this.currentSprite === this.sprites.stand.left) {
-            maxFrame = 59; 
+            maxFrame = 22; 
         } else if (this.currentSprite === this.sprites.run.right || this.currentSprite === this.sprites.run.left) {
-            maxFrame = 29; 
+            maxFrame = 22; 
         }
 
         if (this.frame > maxFrame) this.frame = 0;
@@ -141,7 +142,7 @@ let hillsImage = new Image();
 hillsImage.src = './image/hills.png';
 
 const platformData = [
-    { x: -1, y: 470, width: platformImage.width, height: platformImage.height, image: platformImage },
+    { x: 0, y: 470, width: platformImage.width, height: platformImage.height, image: platformImage },
     { x: platformImage.width - 3, y: 470, width: platformImage.width, height: platformImage.height, image: platformImage },
     { x: platformImage.width * 2 + 160, y: 470, width: platformImage.width, height: platformImage.height, image: platformImage },
     { x: 300, y: 300, width: 300, height: 50, image: platformImage },
