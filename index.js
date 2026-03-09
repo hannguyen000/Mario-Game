@@ -8,21 +8,21 @@ canvas.height = 576;
 const gravity = 1.2; //weight of gravity (make player fall faster and more natural)
 
 const spriteRunLeft = new Image();
-spriteRunLeft.src = './image/spriteRunLeft.png';
+spriteRunLeft.src = './image/aliceRunLeft.png';
 const spriteRunRight = new Image();
 spriteRunRight.src = './image/aliceRunRight.png';
 const spriteStandLeft = new Image();
-spriteStandLeft.src = './image/spriteStandLeft.png';
+spriteStandLeft.src = './image/aliceStandLeft.png';
 const spriteStandRight = new Image();
-spriteStandRight.src = './image/aliceRunRight.png';
+spriteStandRight.src = './image/aliceStandRight.png';
 class Player {
     constructor() {
         this.position = {
             x: 50,
             y: 30
         }
-        this.width = 66; //of player
-        this.height = 150;
+        this.width = 121; //of player
+        this.height = 100;
         this.velocity = {
             x: 0, //speed of player in x direction
             y: 0 //weight of each jump (up and down)
