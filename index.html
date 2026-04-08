@@ -65,25 +65,25 @@
         /* CONTROLS */
         #controls {
             position: fixed;
-            bottom: 20px;
+            bottom: 30px; /* Cách đáy màn hình */
+            left: 0;
             width: 100%;
             display: flex;
-            justify-content: space-between;
-            padding: 0 40px;
-            z-index: 999; /* QUAN TRỌNG */
-        }
-
-        button {
-            font-size: 28px;
-            padding: 20px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            opacity: 0.7;
-            touch-action: manipulation; /* chống delay + zoom */
+            justify-content: space-around; /* Chia đều 3 nút */
+            align-items: center;
             z-index: 1000;
-        }
+            pointer-events: none; /* Cho phép chạm xuyên qua vùng trống của div */
+            }
+        
+        #controls button {
+            pointer-events: auto; /* Nhưng nút bấm thì phải nhận chạm */
+            width: 80px;  /* Đặt kích thước cố định cho nút tròn */
+            height: 80px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            user-select: none;
+            -webkit-user-select: none;
+            }
     </style>
 </head>
 
