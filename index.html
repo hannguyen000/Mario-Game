@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
+    <!-- mobile enable -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Bunny Adventure</title>
+
     <style>
         body {
             margin: 0;
@@ -11,28 +16,24 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            overflow: hidden; /* Tránh cuộn trang không cần thiết */
+            overflow: hidden;
         }
         
-        /* Container bọc toàn bộ game */
         .game-container {
             position: relative; 
             display: inline-block;
-            line-height: 0; /* Xóa khoảng trống thừa dưới canvas */
+            line-height: 0;
         }
 
         canvas {
             background-color: antiquewhite;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            max-width: 100%;     /* responsive */
+            height: auto;
         }
-    </style>
-</head>
 
-<body>
-    <div class="game-container">
-        <canvas id="mario_game"></canvas>
-
-        <div id="scoreElement" style="
+        /* SCORE */
+        #scoreElement {
             position: absolute; 
             top: 20px; 
             right: 20px; 
@@ -40,10 +41,11 @@
             font-family: Arial; 
             font-size: 24px;
             text-shadow: 2px 2px 4px black;
-            pointer-events: none; /* Để không bị cản trở click vào game */
-        ">Score: 0</div>
-        
-        <button id="restartBtn" style="
+            pointer-events: none;
+        }
+
+        /* RESTART */
+        #restartBtn {
             display: none; 
             position: absolute; 
             top: 90%; 
@@ -52,17 +54,51 @@
             padding: 15px 30px;
             font-size: 20px;
             font-weight: bold;
-            font-family: Arial, sans-serif;
             background-color: #ff4757;
             color: white;
             border: none;
             border-radius: 10px;
-            cursor: pointer;
-            box-shadow: 0 5px #ba1c2a;
-            transition: all 0.1s;
-        ">RESTART GAME</button>
+        }
+
+        /* CONTROLS */
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 40px;
+        }
+
+        button {
+            font-size: 28px;
+            padding: 20px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            opacity: 0.7;
+            touch-action: manipulation; /* chống delay + zoom */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <canvas id="mario_game"></canvas>
+
+        <div id="scoreElement">Score: 0</div>
+
+        <button id="restartBtn">RESTART GAME</button>
     </div>
 
-    <script src="index.js" type="module"></script>
+    <!-- BUTTON MOBILE -->
+    <div id="controls">
+        <button id="leftBtn">⬅️</button>
+        <button id="jumpBtn">⬆️</button>
+        <button id="rightBtn">➡️</button>
+    </div>
+
+    <script src="index.js"></script>
 </body>
 </html>
