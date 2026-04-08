@@ -2,24 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mario Game</title>
+    <title>Bunny Adventure</title>
     <style>
-    body {
-        margin: 0;
-        background-color: black;
-        display: flex; 
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-    }
-    canvas {
-        background-color: antiquewhite;    
-    }   
-</style>
+        body {
+            margin: 0;
+            background-color: #222;
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden; /* Tránh cuộn trang không cần thiết */
+        }
+        
+        /* Container bọc toàn bộ game */
+        .game-container {
+            position: relative; 
+            display: inline-block;
+            line-height: 0; /* Xóa khoảng trống thừa dưới canvas */
+        }
+
+        canvas {
+            background-color: antiquewhite;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+    </style>
 </head>
 
 <body>
-    <canvas id="mario_game" height="100"></canvas>
+    <div class="game-container">
+        <canvas id="mario_game"></canvas>
+
+        <div id="scoreElement" style="
+            position: absolute; 
+            top: 20px; 
+            right: 20px; 
+            color: white; 
+            font-family: Arial; 
+            font-size: 24px;
+            text-shadow: 2px 2px 4px black;
+            pointer-events: none; /* Để không bị cản trở click vào game */
+        ">Score: 0</div>
+        
+        <button id="restartBtn" style="
+            display: none; 
+            position: absolute; 
+            top: 90%; 
+            left: 50%; 
+            transform: translate(-50%, -50%);
+            padding: 15px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 5px #ba1c2a;
+            transition: all 0.1s;
+        ">RESTART GAME</button>
+    </div>
+
     <script src="index.js" type="module"></script>
 </body>
 </html>
