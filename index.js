@@ -402,10 +402,6 @@ function animate() {
     if (player.position.y > canvas.height) init();
 }
 
-// Chạy game
-init();
-animate();
-
 // --- INPUTS ---
 addEventListener('keydown', ({ keyCode }) => {
     switch (keyCode) {
@@ -479,3 +475,7 @@ jumpBtn.addEventListener('pointerdown', (e) => {
     e.preventDefault(); 
     if (player.isOnGround) player.velocity.y = -20; 
 });
+
+// Chạy game
+init();
+animate();
