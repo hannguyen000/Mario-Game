@@ -450,29 +450,32 @@ const leftBtn = document.getElementById('leftBtn');
 const rightBtn = document.getElementById('rightBtn');
 const jumpBtn = document.getElementById('jumpBtn');
 
-// LEFT
-leftBtn.addEventListener('touchstart', () => {
-    keys.left.pressed = true;
-    player.currentSprite = player.sprites.run.left;
-});
-leftBtn.addEventListener('touchend', () => {
-    keys.left.pressed = false;
-    player.currentSprite = player.sprites.stand.left;
-});
-
-// RIGHT
-rightBtn.addEventListener('touchstart', () => {
-    keys.right.pressed = true;
-    player.currentSprite = player.sprites.run.right;
-});
-rightBtn.addEventListener('touchend', () => {
-    keys.right.pressed = false;
-    player.currentSprite = player.sprites.stand.right;
-});
-
-// JUMP
-jumpBtn.addEventListener('touchstart', () => {
-    if (player.isOnGround) {
-        player.velocity.y = -20;
+// Hàm xử lý chung để tránh lặp code
+function handleMove(direction, isPressed) {
+    if (direction === 'left') {
+        keys.left.pressed = isPressed;
+        if (isPressed) player.currentSprite = player.sprites.run.left;
+        else player.currentSprite = player.sprites.stand.left;
     }
+    if (direction === 'right') {
+        keys.right.pressed = isPressed;
+        if (isPressed) player.currentSprite = player.sprites.run.right;
+        else player.currentSprite = player.sprites.stand.right;
+    }
+}
+
+// SỰ KIỆN CHO NÚT TRÁI
+leftBtn.addEventListener('pointerdown', (e) => { e.preventDefault(); handleMove('left', true); });
+leftBtn.addEventListener('pointerup', (e) => { e.preventDefault(); handleMove('left', false); });
+leftBtn.addEventListener('pointerout', (e) => { e.preventDefault(); handleMove('left', false); }); // Phòng trường hợp vuốt tay ra ngoài nút
+
+// SỰ KIỆN CHO NÚT PHẢI
+rightBtn.addEventListener('pointerdown', (e) => { e.preventDefault(); handleMove('right', true); });
+rightBtn.addEventListener('pointerup', (e) => { e.preventDefault(); handleMove('right', false); });
+rightBtn.addEventListener('pointerout', (e) => { e.preventDefault(); handleMove('right', false); });
+
+// SỰ KIỆN CHO NÚT NHẢY
+jumpBtn.addEventListener('pointerdown', (e) => { 
+    e.preventDefault(); 
+    if (player.isOnGround) player.velocity.y = -20; 
 });
