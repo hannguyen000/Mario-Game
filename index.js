@@ -1,307 +1,446 @@
-
 const canvas = document.getElementById('mario_game');
 const c = canvas.getContext('2d');
 
 canvas.width = 1024;
 canvas.height = 576;
 
-const gravity = 1.2; //weight of gravity (make player fall faster and more natural)
+const gravity = 1.2;
 
-const spriteRunLeft = new Image();
-spriteRunLeft.src = './image/aliceRunLeft.png';
-const spriteRunRight = new Image();
-spriteRunRight.src = './image/aliceRunRight.png';
-const spriteStandLeft = new Image();
-spriteStandLeft.src = './image/aliceStandLeft.png';
-const spriteStandRight = new Image();
-spriteStandRight.src = './image/aliceStandRight.png';
+// --- LOAD IMAGES ---
+function createImage(src) {
+    const image = new Image();
+    image.src = src;
+    return image;
+}
+
+const spriteRunLeft = createImage('./image/aliceRunLeft.png');
+const spriteRunRight = createImage('./image/aliceRunRight.png');
+const spriteStandLeft = createImage('./image/aliceStandLeft.png');
+const spriteStandRight = createImage('./image/aliceStandRight.png');
+const bunnyImage = createImage('./image/bunny.png');
+const platformImage = createImage('./image/platform.png');
+const backgroundImage = createImage('./image/background.png');
+const hillsImage = createImage('./image/hills.png');
+const flagImage = createImage('./image/flag.png');
+const carrotImage = createImage('./image/carrot.png');
+const enemyImage = createImage('./image/enemy.png');
+const bombImage = createImage('./image/bomb.png');
+
+// --- GAME VARIABLES ---
+let score = 0;
+let carrots = [];
+const scoreElement = document.getElementById('scoreElement');
+const restartBtn = document.getElementById('restartBtn');
+let player;
+let platforms = [];
+let genericObjects = [];
+let flag;
+let scrollOffset = 0;
+let hasWon = false;
+let lives = 3;
+let enemies = [];
+let bombs = [];
+let gameOver = false;
+
+// --- CLASSES ---
 class Player {
     constructor() {
-        this.position = {
-            x: 50,
-            y: 30
-        }
-        this.width = 121; //of player
-        this.height = 100;
-        this.velocity = {
-            x: 0, //speed of player in x direction
-            y: 0 //weight of each jump (up and down)
-        };
-        this.speed = 8; //speed of player in x direction
-        this.image = spriteStandRight;
+        this.position = { x: 50, y: 30 };
+        this.velocity = { x: 0, y: 0 };
+        this.width = 121;
+        this.height = 130;
+        this.speed = 8;
         this.scale = 0.4;
-        this.frame = 0; //to keep track of which frame of the sprite sheet to show (for animation)
+        this.frame = 0;
         this.sprites = {
-            stand: {
-                right: spriteStandRight,
-                left: spriteStandLeft,
-                cropWidth: 341,
-            },
-            run: {
-                right: spriteRunRight,
-                left: spriteRunLeft,
-                cropWidth: 341,
-                width: 341 //cropWidth / number of frames in the sprite sheet (to make the player smaller when running)
-            }
+            stand: { right: spriteStandRight, left: spriteStandLeft, cropWidth: 341 },
+            run: { right: spriteRunRight, left: spriteRunLeft, cropWidth: 341 }
         };
         this.currentSprite = this.sprites.stand.right;
         this.currentCropWidth = this.sprites.stand.cropWidth;
-
         this.isOnGround = false;
     }
 
-    //function to draw player on canvas
     draw() {
         c.drawImage(
-            this.currentSprite, 
-            this.currentCropWidth * this.frame, 
-            0, 
-            this.currentCropWidth, 
-            400, 
-            this.position.x, 
-            this.position.y, 
-            this.width, 
-            this.height);
-    //c.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-    //sx, sy, sWidth, sHeight = vùng trong sprite sheet (trích từ image gốc). sx, sy = tọa độ (vị trí bắt đầu) vùng cần trích (tính từ góc trên bên trái của image gốc). sWidth, sHeight = kích thước của vùng cần trích.
-    //dx, dy, dWidth, dHeight = vị trí + kích thước vẽ trên canvas.
+            this.currentSprite,
+            this.currentCropWidth * this.frame,
+            0,
+            this.currentCropWidth,
+            400,
+            this.position.x,
+            this.position.y,
+            this.width,
+            this.height
+        );
     }
 
-    //function to update player position and draw it on canvas
     update() {
- // update frame animation
-        if (keys.right.pressed || keys.left.pressed)
-            this.frame++;
-        let maxFrame = 0;
-
-        if (this.currentSprite === this.sprites.stand.right || this.currentSprite === this.sprites.stand.left) {
-            maxFrame = 22; 
-        } else if (this.currentSprite === this.sprites.run.right || this.currentSprite === this.sprites.run.left) {
-            maxFrame = 22; 
-        }
-
-        if (this.frame > maxFrame) this.frame = 0;
+        if (keys.right.pressed || keys.left.pressed) this.frame++;
+        if (this.frame > 22) this.frame = 0;
 
         this.draw();
-
-        // jump up and down
         this.position.y += this.velocity.y;
         this.position.x += this.velocity.x;
 
-        if (this.position.y < 0) {
-            this.position.y = 0;
-            this.velocity.y = 0; // stop the player from moving up further when it reaches the top of the canvas
-        }
-
-        // if player hasn't hit the ground yet, continue jumping down; if player has hit the ground, stop (to create a more natural falling effect)
-        if (this.position.y + this.height + this.velocity.y <= canvas.height ) {
-            //this.direction *= -1;
-            this.velocity.y += gravity; //increase the speed of player every time it falls down (like flappy bird)
+        if (this.position.y + this.height + this.velocity.y <= canvas.height) {
+            this.velocity.y += gravity;
         }
     }
 }
 
 class Platform {
-    constructor({ x, y, width, height, image}) {
-        this.position = { 
-            x: x, 
-            y: y };
-    
+    constructor({ x, y, width, height, image }) {
+        this.position = { x, y };
         this.image = image;
-
         this.width = width;
         this.height = height;
-
     }
-
     draw() {
         c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
     }
 }
 
+class Flag {
+    constructor({ x, y }) {
+        this.position = { x, y };
+        this.width = 50;
+        this.height = 120;
+    }
+    draw() {
+        c.drawImage(flagImage, this.position.x, this.position.y, this.width, this.height);
+    }
+}
+
 class GenericObject {
-    constructor({ x, y, image}) {
-        this.position = { 
-            x: x, 
-            y: y };
+    constructor({ x, y, image }) {
+        this.position = { x, y };
         this.image = image;
     }
-
     draw() {
         c.drawImage(this.image, this.position.x, this.position.y);
     }
 }
 
-let player;
-let platformImage = new Image();
-platformImage.src = './image/platform.png';
+class Carrot {
+    constructor({ x, y }) {
+        this.position = { x, y };
+        this.width = 120;
+        this.height = 200;
+        this.collected = false;
+    }
 
-let backgroundImage = new Image();
-backgroundImage.src = './image/background.png';
-let hillsImage = new Image();
-hillsImage.src = './image/hills.png';
+    draw() {
+        if (!this.collected) {
+            c.drawImage(carrotImage, this.position.x, this.position.y, this.width, this.height);
+        }
+    }
+}
 
-const platformData = [
-    { x: 0, y: 470, width: platformImage.width, height: platformImage.height, image: platformImage },
-    { x: platformImage.width - 3, y: 470, width: platformImage.width, height: platformImage.height, image: platformImage },
-    { x: platformImage.width * 2 + 160, y: 470, width: platformImage.width, height: platformImage.height, image: platformImage },
-    { x: 300, y: 300, width: 300, height: 50, image: platformImage },
-    { x: 500, y: 200, width: 300, height: 50, image: platformImage },
-];
+class Bomb {
+    constructor({ x, y, velocity }) {
+        this.position = { x, y };
+        this.velocity = velocity;
+        this.width = 60;
+        this.height = 60;
+    }
 
-let platforms = [];
+    draw() {
+        c.drawImage(bombImage, this.position.x, this.position.y, this.width, this.height);
+    }
 
-let genericObjects = [];
-let scrollOffset = 0; //to keep track of how far the player has scrolled to the right (to determine when to end the game)
+    update() {
+        this.draw();
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
+        this.velocity.y += 0.5; // Gia tốc trọng lực cho bom
+    }
+}
+
+class Enemy {
+    constructor({ x, y }) {
+        this.position = { x, y };
+        this.width = 220;
+        this.height = 180;
+        this.shootTimer = 0;
+    }
+
+    draw() {
+        c.drawImage(enemyImage, this.position.x, this.position.y, this.width, this.height);
+    }
+
+    update() {
+        this.draw();
+        this.shootTimer++;
+
+        // Cứ mỗi 100 frames (~1.5 giây) ném 1 quả bom
+        if (this.shootTimer % 100 === 0) {
+            this.shoot();
+        }
+    }
+
+    shoot() {
+        bombs.push(new Bomb({
+            x: this.position.x,
+            y: this.position.y,
+            velocity: { x: -5, y: 0 }
+        }));
+    }
+}
+
+// Thay thế pWidth/pHeight bằng số cụ thể nếu ảnh chưa load kịp
+const P_WIDTH = 580; 
+const P_HEIGHT = 125;
+const gap = 160;
 
 function init() {
+    lives = 3;
+    gameOver = false;
     player = new Player();
+    hasWon = false;
+    scrollOffset = 0;
 
-    platforms = platformData.map(data => 
-        new Platform({ ...data, image: platformImage })
-    );
+    platforms = [
+        new Platform({ x: 0, y: 470, width: P_WIDTH, height: P_HEIGHT, image: platformImage }),
+        new Platform({ x: P_WIDTH, y: 470, width: P_WIDTH, height: P_HEIGHT, image: platformImage }),
+        new Platform({ x: P_WIDTH * 2 + gap, y: 470, width: P_WIDTH, height: P_HEIGHT, image: platformImage }),
+        new Platform({ x: P_WIDTH * 3 + gap, y: 320, width: P_WIDTH / 2, height: P_HEIGHT, image: platformImage }),
+        new Platform({ x: P_WIDTH * 4, y: 220, width: P_WIDTH / 2, height: P_HEIGHT, image: platformImage }),
+        new Platform({ x: P_WIDTH * 6, y: 470, width: P_WIDTH * 1.5, height: P_HEIGHT, image: platformImage }),
+        new Platform({ x: (P_WIDTH * 5) - 50, y: 350, width: P_WIDTH / 2, height: P_HEIGHT, image: platformImage }),
+        new Platform({ x: (P_WIDTH * 7) + gap * 3, y: 300, width: P_WIDTH/4, height: P_HEIGHT, image: platformImage }),
+        new Platform({ x: (P_WIDTH * 8) + gap, y: 220, width: P_WIDTH/4, height: P_HEIGHT, image: platformImage }),
+        new Platform({ x: P_WIDTH * 9, y: 450, width: P_WIDTH, height: P_HEIGHT, image: platformImage }),
+        new Platform({ x: (P_WIDTH * 10) - 50   , y: 450, width: P_WIDTH, height: P_HEIGHT, image: platformImage })
+    ];
+
+    enemies = [
+    new Enemy({ x: 1700, y: 100 }),
+    new Enemy({ x: 3000, y: 50 }),
+    new Enemy({ x: 5000, y: 100 })
+    ];
+
+    score = 0;
+    scoreElement.innerHTML = `Score: ${score}`;
+    
+    carrots = [
+        new Carrot({ x: 600, y: 50 }),
+        new Carrot({ x: 750, y: 50 }),
+        new Carrot({ x: 900, y: 50 }),
+
+
+        new Carrot({ x: 1200, y: 30 }),
+        new Carrot({ x: 2000, y: 5 }),
+        new Carrot({ x: 2900, y: 30 }),
+        new Carrot({ x: 3000, y: 30 }),
+        new Carrot({ x: 3100, y: 30 }),
+        new Carrot({ x: 3200, y: 300 })
+    ];
 
     genericObjects = [
         new GenericObject({ x: -1, y: -1, image: backgroundImage }),
-        new GenericObject({ x: -1, y: -1, image: hillsImage }),
+        new GenericObject({ x: -1, y: -1, image: hillsImage })
     ];
-    
-    scrollOffset = 0;
+
+    const lastPlat = platforms[platforms.length - 1];
+    flag = new Flag({
+        x: lastPlat.position.x + lastPlat.width - 100,
+        y: lastPlat.position.y - 120
+    });
 }
 
-init();
+const keys = { right: { pressed: false }, left: { pressed: false } };
 
-const keys = {  
-    right: {
-        pressed: false
-    },      
-    left: {
-        pressed: false
-    }
-};
+function drawWinScreen() {
+    const bunnyY = canvas.height / 2 + Math.sin(Date.now() / 200) * 20;
+    c.drawImage(bunnyImage, canvas.width/2 - 130, bunnyY - 150 , 250, 270);
 
-//loop to animate the player (to make it move and jump)
+    c.font = '50px Arial';
+    c.textAlign = 'center';
+    c.fillStyle = 'black';
+    c.fillText('YOU WIN!', canvas.width / 2, 150);
+
+    c.font = '35px Arial';
+    c.fillStyle = 'black';
+    c.fillText(`Final Score: ${score}`, canvas.width / 2, 450);
+
+    restartBtn.style.display = 'block';
+}
+
+function drawLostScreen() {
+    c.font = '50px Arial';
+    c.textAlign = 'center';
+    c.fillStyle = 'red';
+    c.fillText('GAME OVER', canvas.width / 2, 150);
+
+    c.font = '35px Arial';
+    c.fillStyle = 'black';
+    c.fillText(`Final Score: ${score}`, canvas.width / 2, 450);
+
+    restartBtn.style.display = 'block';
+}
+
 function animate() {
     requestAnimationFrame(animate);
-    c.clearRect(0, 0, canvas.width, canvas.height); //clear canvas every frame to prevent player from leaving a trail of rectangles behind it
+    c.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (hasWon) {
+        drawWinScreen();
+        return;
+    }
+
+    if (gameOver) {
+        drawLostScreen();
+        return;
+    }
+    genericObjects.forEach(obj => obj.draw());
+    platforms.forEach(plat => plat.draw());
     
-    genericObjects.forEach(genericObject => genericObject.draw());
-    platforms.forEach(platform => platform.draw());
-    player.update();
-    player.isOnGround = false;
+    // Cập nhật vị trí cờ theo platform cuối
+    const lastPlat = platforms[platforms.length - 1];
+    flag.position.x = lastPlat.position.x + lastPlat.width - 100;
+    flag.draw();
 
-    if (keys.left.pressed && player.position.x > 100) 
-        player.velocity.x = -player.speed; //move left 
-    else if (keys.right.pressed && player.position.x < 400) 
-        player.velocity.x = player.speed; //move right
-    else {
-        player.velocity.x = 0;
+    // Xử lý Cà rốt
+    carrots.forEach(carrot => {
+        carrot.draw();
 
-        if (keys.right.pressed){
-            scrollOffset += 5;
-            platforms.forEach(platform => {
-                platform.position.x -= player.speed;
-            });
-            genericObjects.forEach(genericObject => {
-                genericObject.position.x -= player.speed * 0.66; //move background slower than platforms to create a parallax effect
-            });
+        // Thu nhỏ vùng va chạm (Hitbox)
+        const paddingX = 50; // Alice phải chạm sâu vào 30px theo chiều ngang
+        const paddingY = 50; // Alice phải chạm sâu vào 20px theo chiều dọc
+
+        // Kiểm tra va chạm với nhân vật
+        if (!carrot.collected &&
+        player.position.x + player.width - paddingX >= carrot.position.x &&
+        player.position.x + paddingX <= carrot.position.x + carrot.width &&
+        player.position.y + player.height >= carrot.position.y &&
+        player.position.y + paddingY <= carrot.position.y + carrot.height
+        ) {
+            carrot.collected = true;
+            score += 100;
+            scoreElement.innerHTML = `Score: ${score}`;
         }
-        else if (keys.left.pressed && scrollOffset > 0) { 
-            scrollOffset -= 5;
-            platforms.forEach(platform => {
-                platform.position.x += player.speed;
-            });
-            genericObjects.forEach(genericObject => {
-                genericObject.position.x += player.speed * 0.66;
-            });
+    });
 
+    // Cập nhật Enemy
+    enemies.forEach(enemy => enemy.update());
+
+    // Cập nhật Bom và Va chạm
+    bombs.forEach((bomb, index) => {
+        bomb.update();
+
+        // 1. Bom chạm Alice
+        if (
+            player.position.x < bomb.position.x + bomb.width &&
+            player.position.x + player.width > bomb.position.x &&
+            player.position.y < bomb.position.y + bomb.height &&
+            player.position.y + player.height > bomb.position.y
+        ) {
+            bombs.splice(index, 1); // Xóa bom ngay khi chạm
+            lives--; // Trừ mạng
+            if (lives <= 0) {
+                gameOver = true;
+            }
+        }
+
+        // 2. Xóa bom nếu bay ra khỏi màn hình
+        if (bomb.position.y > canvas.height) {
+            bombs.splice(index, 1);
+        }
+    });
+
+    // Vẽ số mạng lên màn hình
+    c.font = '24px Arial';
+    c.fillStyle = 'red';
+    c.fillText('❤️'.repeat(lives), 100, 50);
+
+    // Player Movement
+    if (keys.right.pressed && player.position.x < 400) {
+        player.velocity.x = player.speed;
+    } else if ((keys.left.pressed && player.position.x > 100) || (keys.left.pressed && scrollOffset === 0 && player.position.x > 0)) {
+        player.velocity.x = -player.speed;
+    } else {
+        player.velocity.x = 0;
+        if (keys.right.pressed) {
+            scrollOffset += player.speed;
+            platforms.forEach(plat => plat.position.x -= player.speed);
+            carrots.forEach(carrot => carrot.position.x -= player.speed); // CUỘN SANG PHẢI
+            bombs.forEach(bomb => bomb.position.x -= player.speed); // CUỘN SANG PHẢI
+            enemies.forEach(enemy => enemy.position.x -= player.speed);
+            genericObjects.forEach(obj => obj.position.x -= player.speed * 0.66);
+        } else if (keys.left.pressed && scrollOffset > 0) {
+            scrollOffset -= player.speed;
+            platforms.forEach(plat => plat.position.x += player.speed);
+            carrots.forEach(carrot => carrot.position.x += player.speed); // Di chuyển cà rốt
+            bombs.forEach(bomb => bomb.position.x += player.speed); // CUỘN SANG PHẢI
+            enemies.forEach(enemy => enemy.position.x += player.speed);
+            genericObjects.forEach(obj => obj.position.x += player.speed * 0.66);
         }
     }
 
-    platforms.forEach(platform => {
-        const playerBottom = player.position.y + player.height;
-        const nextPlayerBottom = playerBottom + player.velocity.y;
-
-        if (
-            playerBottom <= platform.position.y &&
-            nextPlayerBottom >= platform.position.y &&
-            player.position.x + player.width >= platform.position.x &&
-            player.position.x <= platform.position.x + platform.width
-        ) {
-            player.velocity.y = 0; 
-            player.position.y = platform.position.y - player.height; // player đứng đúng trên platform
+    // Platform Collision
+    player.isOnGround = false;
+    platforms.forEach(plat => {
+        if (player.position.y + player.height <= plat.position.y &&
+            player.position.y + player.height + player.velocity.y >= plat.position.y &&
+            player.position.x + player.width >= plat.position.x &&
+            player.position.x <= plat.position.x + plat.width) {
+            player.velocity.y = 0;
             player.isOnGround = true;
         }
     });
 
-    // win condition: scroll to the right far enough
-    if (scrollOffset > 2000) {
-        console.log('You win!');
+    // Win check (Flag collision)
+    if (player.position.x + player.width >= flag.position.x &&
+        player.position.x <= flag.position.x + flag.width &&
+        player.position.y + player.height >= flag.position.y) {
+        hasWon = true;
     }
 
-    //lose condition: fall down below the canvas
-    if (player.position.y > canvas.height) {
-        console.log('You lose!');
-        init(); //reset the game
-    }
+    player.update();
+
+    if (player.position.y > canvas.height) init();
 }
 
+// Chạy game
+init();
 animate();
 
+// --- INPUTS ---
 addEventListener('keydown', ({ keyCode }) => {
-    console.log(keyCode);
     switch (keyCode) {
-        case 37: // Left arrow
-        case 65: // 'A'
+        case 65: case 37: 
+            keys.left.pressed = true; 
             player.currentSprite = player.sprites.run.left;
-            player.currentCropWidth = player.sprites.run.cropWidth;
-            player.width = player.currentCropWidth * player.scale;
-            keys.left.pressed = true;
             break;
-        case 38: // Up arrow
-        case 87: // 'W'
-            if (player.isOnGround) { // just allow the player to jump if it's on the ground (to prevent double jumping)
-                player.velocity.y = -20; 
-                player.isOnGround = false; // set isOnGround to false when the player jumps, so it can't jump again until it lands back on the ground
-            }
-            break;
-        case 39: // Right arrow
-        case 68: // 'D'
+        case 68: case 39: 
+            keys.right.pressed = true; 
             player.currentSprite = player.sprites.run.right;
-            player.currentCropWidth = player.sprites.run.cropWidth;
-            player.width = player.currentCropWidth * player.scale;
-            keys.right.pressed = true;
             break;
-        case 40: // Down arrow
-        case 83: // 'S'
-            player.velocity.y = 10;
+        case 87: case 38: 
+            if (player.isOnGround) player.velocity.y = -20; 
             break;
     }
 });
 
-// when releasing the key, stop moving => if not present, the player will continue moving indefinitely even without pressing the key (similar to flappy bird)
 addEventListener('keyup', ({ keyCode }) => {
-    console.log(keyCode);
-switch (keyCode) {
-    case 37: // Left arrow
-    case 65: // 'A'
-        player.currentSprite = player.sprites.stand.left;
-        player.currentCropWidth = player.sprites.stand.cropWidth;
-        player.width = player.currentCropWidth * player.scale;
-        keys.left.pressed = false;
-        break;
-    case 38: // Up arrow
-    case 87: // 'W'
-        break;
-    case 39: // Right arrow
-    case 68: // 'D'
-        player.currentSprite = player.sprites.stand.right;
-        player.currentCropWidth = player.sprites.stand.cropWidth;
-        player.width = player.currentCropWidth * player.scale;
-        keys.right.pressed = false;
-        break;
-    case 40: // Down arrow
-    case 83: // 'S'
-        break;
-}
+    switch (keyCode) {
+        case 65: case 37: 
+            keys.left.pressed = false; 
+            player.currentSprite = player.sprites.stand.left;
+            break;
+        case 68: case 39: 
+            keys.right.pressed = false; 
+            player.currentSprite = player.sprites.stand.right;
+            break;
+    }
+});
+
+restartBtn.addEventListener('click', () => {
+    // 1. Reset các biến game
+    init();
+    hasWon = false;
+    
+    // 2. Ẩn nút đi để chơi tiếp
+    restartBtn.style.display = 'none';
 });
