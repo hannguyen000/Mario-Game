@@ -444,3 +444,35 @@ restartBtn.addEventListener('click', () => {
     // 2. Ẩn nút đi để chơi tiếp
     restartBtn.style.display = 'none';
 });
+
+// --- MOBILE CONTROLS ---
+const leftBtn = document.getElementById('leftBtn');
+const rightBtn = document.getElementById('rightBtn');
+const jumpBtn = document.getElementById('jumpBtn');
+
+// LEFT
+leftBtn.addEventListener('touchstart', () => {
+    keys.left.pressed = true;
+    player.currentSprite = player.sprites.run.left;
+});
+leftBtn.addEventListener('touchend', () => {
+    keys.left.pressed = false;
+    player.currentSprite = player.sprites.stand.left;
+});
+
+// RIGHT
+rightBtn.addEventListener('touchstart', () => {
+    keys.right.pressed = true;
+    player.currentSprite = player.sprites.run.right;
+});
+rightBtn.addEventListener('touchend', () => {
+    keys.right.pressed = false;
+    player.currentSprite = player.sprites.stand.right;
+});
+
+// JUMP
+jumpBtn.addEventListener('touchstart', () => {
+    if (player.isOnGround) {
+        player.velocity.y = -20;
+    }
+});
