@@ -73,6 +73,8 @@
             align-items: center;
             z-index: 1000;
             pointer-events: none; /* Cho phép chạm xuyên qua vùng trống của div */
+            touch-action: none; /* Tắt hoàn toàn các cử chỉ mặc định của trình duyệt mobile */
+            -webkit-tap-highlight-color: transparent;
             }
         
         #controls button {
@@ -82,6 +84,7 @@
             background: rgba(255, 255, 255, 0.3);
             border: 2px solid rgba(255, 255, 255, 0.5);
             user-select: none;
+            touch-action: none; 
             -webkit-user-select: none;
             }
     </style>
