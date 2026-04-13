@@ -194,6 +194,8 @@ const P_HEIGHT = 125;
 const gap = 160;
 
 function init() {
+    displayedText = '';
+    textIndex = 0;
     lives = 3;
     gameOver = false;
     player = new Player();
@@ -251,17 +253,66 @@ function init() {
 
 const keys = { right: { pressed: false }, left: { pressed: false } };
 
+let displayedText = '';
+let textIndex = 0;
+let lastUpdate = 0;
+
+const fullText = 'Chúc Nam thi tốt và vào được trường mình muốn nhé. Trường đại học hay trường nghề thì chị đều ủng hộ hết mình!';
+
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    const words = text.split(' ');
+    let line = '';
+
+    for (let n = 0; n < words.length; n++) {
+        let testLine = line + words[n] + ' ';
+        let metrics = ctx.measureText(testLine);
+        let testWidth = metrics.width;
+
+        if (testWidth > maxWidth && n > 0) {
+            ctx.fillText(line, x, y);
+            line = words[n] + ' ';
+            y += lineHeight;
+        } else {
+            line = testLine;
+        }
+    }
+    ctx.fillText(line, x, y);
+}
+
+// từng chữ xuất hiện
+function updateTypewriter() {
+    if (textIndex < fullText.length) {
+        displayedText += fullText[textIndex];
+        textIndex++;
+    }
+}
+
 function drawWinScreen() {
+    const now = Date.now();
+
+    // update chữ mỗi 60ms
+    if (now - lastUpdate > 60) {
+        updateTypewriter();
+        lastUpdate = now;
+    }
+
     const bunnyY = canvas.height / 2 + Math.sin(Date.now() / 200) * 20;
     c.drawImage(bunnyImage, canvas.width/2 - 130, bunnyY - 150 , 250, 270);
 
     c.font = '50px Arial';
     c.textAlign = 'center';
     c.fillStyle = 'black';
-    c.fillText('Chúc Nam thi tốt và vào được trường mình muốn nhé. Trường đại học hay trường nghề thì chị đều ủng hộ hết mình!', canvas.width / 2, 150);
+
+    wrapText(
+        c,
+        displayedText,
+        canvas.width / 2,
+        150,
+        700,
+        60
+    );
 
     c.font = '35px Arial';
-    c.fillStyle = 'black';
     c.fillText(`Final Score: ${score}`, canvas.width / 2, 450);
 
     restartBtn.style.display = 'block';
