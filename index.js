@@ -258,7 +258,7 @@ function drawWinScreen() {
     c.font = '50px Arial';
     c.textAlign = 'center';
     c.fillStyle = 'black';
-    c.fillText('YOU WIN!', canvas.width / 2, 150);
+    c.fillText('Chúc Nam thi tốt và vào được trường mình muốn nhé. Trường đại học hay trường nghề thì chị đều ủng hộ hết mình!', canvas.width / 2, 150);
 
     c.font = '35px Arial';
     c.fillStyle = 'black';
