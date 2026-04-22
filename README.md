@@ -4,8 +4,6 @@ I built this project primarily as a personal playground to figure out how 2D ani
 
 **Play the Live Demo here: https://hannguyen000.github.io/Mario-Game/**
 
-**Why I built this**
-
 The main goal wasn't "coding a game." It was about:
 
 * Learning Animation: I’ve always wanted to know how a static drawing becomes a moving character.
